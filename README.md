@@ -5,6 +5,10 @@ Electrical Engineering Undergraduate Degree Final Project: Fish Fry Counting
 home
 │   README.md
 │
-└───counter
-        linecounter.py
+├───counter
+│       linecounter.py
+└───tracker
+        boxes_utils.py
+        kalmanfilter.py
+        tracker.py
 ```

@@ -8,3 +8,9 @@ home
     ├───counter
     └───tracker
 ```
+
+## Model Zoo
+Trained model on Fish Datasets
+Link: https://drive.google.com/drive/folders/1wnczWMhbbqzh3UMas6ELxprUHdTadFfi
+### Performance Benchmarks
+TO DO

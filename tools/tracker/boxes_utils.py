@@ -1,3 +1,5 @@
+import numpy as np
+
 def iou_batch(bb_test, bb_gt):
   """
   From SORT: Computes IOU between two bboxes in the form [x1,y1,x2,y2]

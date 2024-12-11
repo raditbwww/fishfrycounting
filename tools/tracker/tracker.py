@@ -1,7 +1,7 @@
 import numpy as np
 
-from boxes_utils import iou_batch, dij_distance, DIOU_2, divide_dets_byscore
-from kalmanfilter import KalmanBoxTracker
+from fishfrycounting.tools.tracker.boxes_utils import iou_batch, dij_distance, DIOU_2, divide_dets_byscore
+from fishfrycounting.tools.tracker.kalmanfilter import KalmanBoxTracker
 
 # for association matching
 def linear_assignment(cost_matrix):

@@ -1,3 +1,5 @@
+import cv2
+
 # Draw Final Bbox
 def draw_final_bbox_and_linecount(track_bbs_ids, fish_count, line_x_pos):
   for track in track_bbs_ids:

@@ -1,3 +1,5 @@
+import numpy as np
+
 from filterpy.kalman import KalmanFilter
 
 class KalmanBoxTracker(object):

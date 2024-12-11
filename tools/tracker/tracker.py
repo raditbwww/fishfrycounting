@@ -1,8 +1,4 @@
-from __future__ import print_function
-
-import os
 import numpy as np
-np.random.seed(0)
 
 from boxes_utils import iou_batch, dij_distance, DIOU_2, divide_dets_byscore
 from kalmanfilter import KalmanBoxTracker
@@ -63,23 +59,15 @@ def associate_detections_firststage(highscore_detections,trackers,dij_threshold 
   else:
     matches = np.concatenate(matches,axis=0)
 
-  # print("---stage 1---")
-  # print("matches:",matches)
-  # print("unmatched_trackers:",unmatched_trackers)
-  # print("unmatched_detections:",unmatched_detections)
-
   return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 # 2nd stage
-def associate_detections_secondstage(lowscore_dets,trks,unmatched_trackers_prev,diou_threshold = 0.3):
+def associate_detections_secondstage(lowscore_dets,trks,unmatched_trackers_prev,diou_threshold = 0.7):
   """
   Assigns detections to tracked object (both represented as bounding boxes) for low-score with DIOU_2 method
   lowscore_dets; trks; unmatched_trks: indices of trks that is not matched
   Returns 2 lists of matched and unmatched_trackers
   """
-  # if(len(trks)==0): # what if there is no low-score detections?
-  #   return np.empty((0,2),dtype=int), np.arange(len(lowscore_dets)), np.empty((0,5),dtype=int)
-
   if (len(trks)==0) or (len(unmatched_trackers_prev)==0):
     return np.empty((0,2),dtype=int), unmatched_trackers_prev
 
@@ -88,7 +76,6 @@ def associate_detections_secondstage(lowscore_dets,trks,unmatched_trackers_prev,
   for index in unmatched_trackers_prev:
     unmatched_trks.append(trks[index])
   unmatched_trks = np.array(unmatched_trks)
-  # print("unmatched_trks:",unmatched_trks)
 
   # matrix calc
   iou_matrix = iou_batch(lowscore_dets,unmatched_trks)
@@ -126,12 +113,7 @@ def associate_detections_secondstage(lowscore_dets,trks,unmatched_trackers_prev,
   else:
     matches = np.concatenate(matches,axis=0)
 
-  # print("---stage 2---")
-  # print("matches:",matches)
-  # print("unmatched_trackers:",unmatched_trackers)
-  # print("unmatched_detections:",unmatched_detections)
-
-  #replace with elements with true value
+  # replace with elements with true value
   # Replace the second element in each row of `matches` using the second element as the index for unmatched_trks
   for i in range(matches.shape[0]):
       # Use the second element in the row as the index for unmatched_trks
@@ -141,23 +123,15 @@ def associate_detections_secondstage(lowscore_dets,trks,unmatched_trackers_prev,
   for i,value in enumerate(unmatched_trackers):
     unmatched_trackers[i] = unmatched_trackers_prev[value]
 
-  # print("---stage 2---")
-  # print("matches:",matches)
-  # print("unmatched_trackers:",unmatched_trackers)
-  # print("unmatched_detections:",unmatched_detections)
-
   return matches, np.array(unmatched_trackers)
 
 # 3rd stage
-def associate_detections_thirdstage(dets,trks,unmatched_trackers_prev,unmatched_detections_prev,diou_threshold = 0.3):
+def associate_detections_thirdstage(dets,trks,unmatched_trackers_prev,unmatched_detections_prev,diou_threshold = 0.7):
   """
   Assigns detections to tracked object (both represented as bounding boxes) for low-score with DIOU_2 method with higher threshold
 
   Returns 3 lists of matched and unmatched_trackers
   """
-  # if(len(trks)==0): # what if there is no low-score detections?
-  #   return np.empty((0,2),dtype=int), unmatched_detections_prev, unmatched_trackers_prev
-
   if (len(dets)==0) or (len(trks)==0) or (len(unmatched_trackers_prev)==0) or (len(unmatched_detections_prev)==0):
     return np.empty((0,2),dtype=int), unmatched_detections_prev, unmatched_trackers_prev
 
@@ -166,14 +140,12 @@ def associate_detections_thirdstage(dets,trks,unmatched_trackers_prev,unmatched_
   for index in unmatched_detections_prev:
     unmatched_dets.append(dets[index])
   unmatched_dets = np.array(unmatched_dets)
-  # print("unmatched_dets:",unmatched_dets)
 
   # extract the value of unmatched_trackers_prev from trks to create unmatched_trks
   unmatched_trks = []
   for index in unmatched_trackers_prev:
     unmatched_trks.append(trks[index])
   unmatched_trks = np.array(unmatched_trks)
-  # print("unmatched_trks:",unmatched_trks)
 
   # matrix calc
   iou_matrix = iou_batch(unmatched_dets,unmatched_trks)
@@ -211,11 +183,6 @@ def associate_detections_thirdstage(dets,trks,unmatched_trackers_prev,unmatched_
   else:
     matches = np.concatenate(matches,axis=0)
 
-  # print("---stage 3---")
-  # print("matches:",matches)
-  # print("unmatched_trackers:",unmatched_trackers)
-  # print("unmatched_detections:",unmatched_detections)
-
   # replace with elements with true value for detections
   # Replace the second element in each row of `matches` using the second element as the index for unmatched_dets
   for i in range(matches.shape[0]):
@@ -236,23 +203,20 @@ def associate_detections_thirdstage(dets,trks,unmatched_trackers_prev,unmatched_
   for i,value in enumerate(unmatched_trackers):
     unmatched_trackers[i] = unmatched_trackers_prev[value]
 
-  # print("---stage 3---")
-  # print("matches:",matches)
-  # print("unmatched_trackers:",unmatched_trackers)
-  # print("unmatched_detections:",unmatched_detections)
-
   return matches, np.array(unmatched_detections), np.array(unmatched_trackers)
 
 # the sort itself
 class Sort(object):
-  def __init__(self, max_age=1, min_hits=1, iou_threshold=0.3, dij_threshold=0.9):
+  def __init__(self, max_age=1, min_hits=1, dij_threshold=0.9, diou_threshold_2=0.7, diou_threshold_3=0.7, conf_score_threshold=0.7):
     """
     Sets key parameters for SORT
     """
     self.max_age = max_age
     self.min_hits = min_hits
-    self.diou_threshold = iou_threshold
     self.dij_theshold = dij_threshold
+    self.diou_threshold_2 = diou_threshold_2
+    self.diou_threshold_3 = diou_threshold_3
+    self.conf_score_threshold = conf_score_threshold
     self.trackers = []
     self.frame_count = 0
 
@@ -266,9 +230,6 @@ class Sort(object):
     NOTE: The number of objects returned may differ from the number of detections provided.
     """
     self.frame_count += 1
-    # get predicted locations from existing trackers.
-    # print(f"self.trackers:{self.trackers}")
-    # print(f"len:{len(self.trackers)}")
     trks = np.zeros((len(self.trackers), 5))
     to_del = []
     ret = []
@@ -281,83 +242,43 @@ class Sort(object):
     for t in reversed(to_del):
       self.trackers.pop(t)
 
-    # check the prediction
-    # for trk in reversed(self.trackers):
-    #   d = trk.get_state()[0]
-    #   print("d:",d)
-    #   x_min, y_min, x_max, y_max = d
-    #   x_min, y_min, x_max, y_max = int(x_min), int(y_min), int(x_max), int(y_max)
-    #   # Draw the bounding box
-    #   # Define the color for the bounding box (e.g., green) and thickness
-    #   color = (255, 0, 255)  # Green color in BGR format
-    #   thickness = 2  # Thickness of the bounding box
-    #   cv2.rectangle(im0, (x_min, y_min), (x_max, y_max), color, thickness)
-    # print("---")
-
-    # print(f"dets: {dets}")
-    # print(f"trks: {trks}")
-    # print("---")
     # divide high-score and low-score
-    highscore_dets, lowscore_dets = divide_dets_byscore(dets)
-    # print(f"highscore_dets:{highscore_dets}")
-    # print(f"lowscore_dets:{lowscore_dets}")
+    highscore_dets, lowscore_dets = divide_dets_byscore(dets, self.conf_score_threshold)
 
     # matching: following the pipeline from the paper
     # first stage
     matched1, unmatched_dets1, unmatched_trks = associate_detections_firststage(highscore_dets,trks,self.dij_theshold)
     # second stage
-    matched2, unmatched_trks = associate_detections_secondstage(lowscore_dets,trks,unmatched_trks,self.diou_threshold)
+    matched2, unmatched_trks = associate_detections_secondstage(lowscore_dets,trks,unmatched_trks,self.diou_threshold_2)
     # third stage
-    matched3, unmatched_dets3, unmatched_trks = associate_detections_thirdstage(highscore_dets,trks,unmatched_trks,unmatched_dets1,self.diou_threshold)
-    # print("---")
+    matched3, unmatched_dets3, unmatched_trks = associate_detections_thirdstage(highscore_dets,trks,unmatched_trks,unmatched_dets1,self.diou_threshold_3)
+
+
     # update matched trackers with assigned detections
     dets = np.concatenate((highscore_dets,lowscore_dets),axis=0)
-    # print(f"dets:{dets}")
     matched2[:,0]+=len(highscore_dets)
-    # print(f"matched1:{matched1}")
-    # print(f"matched2:{matched2}")
-    # print(f"matched3:{matched3}")
     matched = np.concatenate((matched1, matched3, matched2), axis=0)
-    # print(f"matched:{matched}")
     unmatched_dets = unmatched_dets3
-
-    # print("---")
-    # print("matched:")
-    # print(matched,matched.shape)
-    # print("unmatched dets:")
-    # print(unmatched_dets, unmatched_dets.shape)
-    # print("unmatched trks:")
-    # print(unmatched_trks, unmatched_trks.shape)
-
-    # for trk in self.trackers:
-
 
     for m in matched:
       self.trackers[m[1]].update(dets[m[0], :])
-    # print(f"self.trackers:{self.trackers}")
-    # print(f"len:{len(self.trackers)}")
     # create and initialise new trackers for unmatched detections
     for i in unmatched_dets:
         trk = KalmanBoxTracker(dets[i,:])
         self.trackers.append(trk)
-    # print(f"self.trackers:{self.trackers}")
-    # print(f"len:{len(self.trackers)}")
     i = len(self.trackers)
     for trk in reversed(self.trackers):
-      # print(trk)
       d = trk.get_state()[0]
-      print("d:",d)
       if (trk.time_since_update < 1) and (trk.hit_streak >= self.min_hits or self.frame_count <= self.min_hits):
         ret.append(np.concatenate((d,[trk.id+1])).reshape(1,-1)) # +1 as MOT benchmark requires positive
       i -= 1
       # remove dead tracklet
       if(trk.time_since_update > self.max_age):
         self.trackers.pop(i)
-    print(f"self.trackers:{self.trackers}")
-    print(f"len:{len(self.trackers)}")
     i = len(self.trackers)
-    # print(f"ret:{ret}")
+
     if(len(ret)>0):
       return np.concatenate(ret)
+
     return np.empty((0,5))
 

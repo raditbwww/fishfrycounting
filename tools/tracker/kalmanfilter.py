@@ -21,6 +21,7 @@ class KalmanBoxTracker(object):
     self.kf.Q[4:,4:] *= 0.01
 
     self.kf.x[:4] = convert_bbox_to_z(bbox)
+    self.kf.x[4] = -75 #initial velocity of the boxes in x direction (- is to the left and + is to the right)
     self.time_since_update = 0
     self.id = KalmanBoxTracker.count
     KalmanBoxTracker.count += 1

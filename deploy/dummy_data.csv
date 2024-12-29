@@ -1,0 +1,11 @@
+device_id,pool_id,location_id,fish_type_id,fish_size_id,counting_date,count,sold
+alat1,kolam1,ciparay,nila hitam,5-7 cm,2023-12-01,100,FALSE
+alat2,kolam2,soreang,lele,7-9 cm,2023-12-02,80,FALSE
+alat1,kolam1,soreang,nila hitam,9-12 cm,2023-12-03,120,TRUE
+alat2,kolam2,ciparay,lele,5-7 cm,2023-12-04,50,FALSE
+alat1,kolam1,ciparay,nila hitam,7-9 cm,2023-12-05,200,TRUE
+alat2,kolam2,soreang,lele,9-12 cm,2023-12-06,150,FALSE
+alat1,kolam1,soreang,nila hitam,5-7 cm,2023-12-07,130,TRUE
+alat2,kolam2,ciparay,lele,7-9 cm,2023-12-08,70,FALSE
+alat1,kolam1,ciparay,nila hitam,9-12 cm,2023-12-09,110,FALSE
+alat2,kolam2,soreang,lele,5-7 cm,2023-12-10,90,TRUE
